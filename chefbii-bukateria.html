@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chefbii Bukateria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&family=Noto+Serif:ital,wght@1,400&display=swap" rel="stylesheet" />
+
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root {
+  --red:       #D0021B;
+  --red-hover: #A80016;
+  --red-soft:  rgba(208,2,27,0.10);
+  --red-glow:  rgba(208,2,27,0.25);
+
+  /* light mode */
+  --bg:        #FFFFFF;
+  --bg2:       #F9F5F0;
+  --bg3:       #F0EAE0;
+  --surface:   #FFFFFF;
+  --border:    rgba(0,0,0,0.08);
+  --text:      #1A1208;
+  --text2:     #5A4A38;
+  --text3:     #8A7A68;
+  --shadow:    rgba(0,0,0,0.07);
+  --shadow2:   rgba(0,0,0,0.13);
+  --pattern-op: 0.04;
+}
+
+[data-theme="dark"] {
+  --bg:        #1C1812;
+  --bg2:       #252018;
+  --bg3:       #302A1E;
+  --surface:   #2A2318;
+  --border:    rgba(255,255,255,0.09);
+  --text:      #F5EFE6;
+  --text2:     #C8B89A;
+  --text3:     #8A7A68;
+  --shadow:    rgba(0,0,0,0.35);
+  --shadow2:   rgba(0,0,0,0.55);
+  --pattern-op: 0.07;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+
+/* ============================================================
+   ADIRE PATTERN (SVG background)
+   ============================================================ */
+.adire-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: var(--pattern-op);
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      var(--red) 0px, var(--red) 1px,
+      transparent 1px, transparent 18px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      var(--red) 0px, var(--red) 1px,
+      transparent 1px, transparent 18px
+    );
+  background-size: 36px 36px;
+  transition: opacity 0.35s;
+}
+
+/* ============================================================
+   THEME TOGGLE
+   ============================================================ */
+.theme-btn {
+  position: fixed;
+  top: 22px;
+  right: 22px;
+  z-index: 999;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 2px 12px var(--shadow2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.35s;
+}
+.theme-btn:hover { transform: scale(1.1); box-shadow: 0 4px 18px var(--shadow2); }
+
+/* ============================================================
+   PAGE SYSTEM
+   ============================================================ */
+.page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(28px);
+  transition: opacity 0.45s cubic-bezier(.4,0,.2,1), transform 0.45s cubic-bezier(.4,0,.2,1);
+  padding: 24px 20px;
+  overflow-y: auto;
+}
+.page.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
+.page.exit {
+  opacity: 0;
+  transform: translateY(-24px);
+  pointer-events: none;
+  transition: opacity 0.32s ease, transform 0.32s ease;
+}
+
+/* ============================================================
+   SHARED COMPONENTS
+   ============================================================ */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: 48px;
+  padding: 16px 36px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 20px var(--red-glow);
+  transition: background 0.2s, transform 0.18s, box-shadow 0.2s;
+}
+.btn-primary:hover {
+  background: var(--red-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px var(--red-glow);
+}
+.btn-primary:active { transform: translateY(0); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--text2);
+  border: 1.5px solid var(--border);
+  border-radius: 48px;
+  padding: 12px 28px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.btn-ghost:hover { border-color: var(--red); color: var(--red); background: var(--red-soft); }
+
+.logo-text {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  color: var(--red);
+  letter-spacing: -0.02em;
+}
+
+/* ============================================================
+   PAGE 1 — LANDING
+   ============================================================ */
+#page-landing {
+  background: var(--bg);
+  text-align: center;
+  gap: 0;
+  justify-content: flex-start;
+  padding: 0;
+}
+
+.landing-hero {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 100vh;
+}
+
+.landing-food-strip {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 42%;
+  overflow: hidden;
+}
+
+.food-mosaic {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  height: 100%;
+  gap: 3px;
+}
+
+.food-tile {
+  font-size: clamp(3rem, 7vw, 6rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg2);
+  position: relative;
+  overflow: hidden;
+}
+
+.food-tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, var(--bg) 100%);
+}
+
+.food-tile:nth-child(1) { font-size: clamp(3.5rem,8vw,7rem); background: var(--bg3); }
+.food-tile:nth-child(3) { font-size: clamp(4rem,9vw,8rem); background: var(--bg2); }
+.food-tile:nth-child(5) { font-size: clamp(3rem,7vw,6rem); background: var(--bg3); }
+
+.landing-content {
+  position: relative;
+  z-index: 2;
+  margin-top: calc(42% - 40px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px 60px;
+}
+
+.landing-brand {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: clamp(2.6rem, 8vw, 5.5rem);
+  line-height: 1.05;
+  color: var(--text);
+  letter-spacing: -0.03em;
+}
+.landing-brand span { color: var(--red); }
+
+.landing-sub {
+  font-family: 'Noto Serif', serif;
+  font-style: italic;
+  font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+  color: var(--text2);
+  max-width: 340px;
+  line-height: 1.6;
+}
+
+.landing-dot-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 4px 0;
+}
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); }
+.dot.sm { width: 4px; height: 4px; opacity: 0.4; }
+
+/* ============================================================
+   PAGE 2 — NAME INPUT
+   ============================================================ */
+#page-name {
+  gap: 32px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.name-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.name-header .greeting {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--red);
+  font-weight: 600;
+}
+
+.name-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.9rem, 5vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.name-header p {
+  font-size: 1rem;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+.name-input-wrap {
+  width: 100%;
+  position: relative;
+}
+
+.name-input {
+  width: 100%;
+  padding: 18px 22px;
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 12px var(--shadow);
+}
+
+.name-input::placeholder { color: var(--text3); }
+.name-input:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 4px var(--red-soft), 0 4px 18px var(--shadow);
+}
+
+/* ============================================================
+   PAGE 3 — QUESTION FLOW
+   ============================================================ */
+#page-questions {
+  gap: 0;
+  justify-content: flex-start;
+  padding-top: 0;
+  overflow: hidden;
+}
+
+.q-wrapper {
+  width: 100%;
+  max-width: 540px;
+  margin: 0 auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 36px 24px 32px;
+  gap: 28px;
+}
+
+.q-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.q-step-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-left: auto;
+}
+
+.progress-bars {
+  display: flex;
+  gap: 5px;
+  flex: 1;
+}
+
+.pbar {
+  flex: 1;
+  height: 3px;
+  border-radius: 4px;
+  background: var(--bg3);
+  overflow: hidden;
+  transition: background 0.3s;
+}
+
+.pbar.done { background: var(--red); }
+.pbar.active {
+  background: var(--bg3);
+  position: relative;
+  overflow: hidden;
+}
+.pbar.active::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  background: var(--red);
+  animation: pbfill 0.6s ease forwards;
+}
+@keyframes pbfill { from { width: 0; } to { width: 100%; } }
+
+.q-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.q-number {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.q-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.6rem, 4.5vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.q-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.q-option {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 2px 10px var(--shadow);
+  text-align: left;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  width: 100%;
+}
+
+.q-option:hover {
+  border-color: var(--red);
+  background: var(--red-soft);
+  transform: translateX(4px);
+}
+
+.q-option.selected {
+  border-color: var(--red);
+  background: var(--red-soft);
+  box-shadow: 0 0 0 2px var(--red-glow), 0 4px 16px var(--shadow);
+}
+
+.q-option-icon {
+  font-size: 1.6rem;
+  min-width: 36px;
+  text-align: center;
+}
+
+.q-option-body { flex: 1; }
+
+.q-option-label {
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.3;
+  display: block;
+}
+
+.q-option-desc {
+  font-size: 0.82rem;
+  color: var(--text3);
+  margin-top: 2px;
+  display: block;
+}
+
+.q-option .check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.q-option.selected .check {
+  border-color: var(--red);
+  background: var(--red);
+}
+.q-option.selected .check::after {
+  content: '✓';
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.q-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.q-grid .q-option {
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 16px 18px;
+  gap: 8px;
+}
+.q-grid .q-option:hover { transform: translateY(-3px); }
+.q-grid .check { align-self: flex-end; margin-top: auto; }
+
+.q-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+}
+
+.q-slide {
+  display: none;
+}
+.q-slide.active-slide {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: slideIn 0.38s cubic-bezier(.4,0,.2,1);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ============================================================
+   PAGE 4 — RESULT
+   ============================================================ */
+#page-result {
+  justify-content: flex-start;
+  padding: 0;
+  overflow-y: auto;
+}
+
+.result-container {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.result-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result-eyebrow {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--red);
+}
+
+.result-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.5rem, 5vw, 2.1rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text);
+}
+.result-title em { color: var(--red); font-style: normal; }
+
+.result-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+}
+.result-divider::before, .result-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.result-divider span { font-size: 1.2rem; }
+
+/* meal card */
+.meal-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px var(--shadow2);
+}
+
+.meal-card-top {
+  background: var(--red);
+  padding: 22px 24px 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.meal-card-top::before {
+  content: '';
+  position: absolute;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.12);
+  top: -60px; right: -40px;
+}
+.meal-card-top::after {
+  content: '';
+  position: absolute;
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.08);
+  bottom: -30px; left: -20px;
+}
+
+.meal-emoji-big { font-size: 3rem; line-height: 1; margin-bottom: 8px; display: block; }
+
+.meal-name {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.meal-subtitle {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.75);
+  margin-top: 4px;
+}
+
+.meal-card-body {
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.meal-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.meal-row-icon {
+  font-size: 1.35rem;
+  min-width: 32px;
+  margin-top: 1px;
+}
+
+.meal-row-body {}
+
+.meal-row-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text3);
+  display: block;
+  margin-bottom: 3px;
+}
+
+.meal-row-value {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.meal-row-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 2px 0;
+}
+
+/* why card */
+.why-card {
+  background: var(--bg2);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.why-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--red);
+}
+
+.why-text {
+  font-size: 0.96rem;
+  color: var(--text2);
+  line-height: 1.7;
+}
+
+/* fun fact */
+.funfact-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 22px 24px;
+  display: flex;
+  gap: 14px;
+}
+
+.funfact-icon { font-size: 1.8rem; flex-shrink: 0; }
+
+.funfact-body {}
+.funfact-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.funfact-text {
+  font-size: 0.88rem;
+  color: var(--text2);
+  line-height: 1.65;
+}
+
+/* order section */
+.order-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0;
+}
+
+.order-note {
+  font-size: 0.82rem;
+  color: var(--text3);
+  text-align: center;
+}
+
+.btn-order {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: 48px;
+  padding: 18px 44px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  box-shadow: 0 6px 28px var(--red-glow);
+  transition: background 0.2s, transform 0.18s, box-shadow 0.2s;
+  text-decoration: none;
+}
+.btn-order:hover {
+  background: var(--red-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 32px var(--red-glow);
+}
+
+.btn-restart {
+  font-size: 0.85rem;
+  color: var(--text3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px;
+  transition: color 0.2s;
+}
+.btn-restart:hover { color: var(--red); }
+
+/* ============================================================
+   LOADING SCREEN
+   ============================================================ */
+#page-loading {
+  gap: 28px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 56px;
+  height: 56px;
+  border: 3px solid var(--border);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  color: var(--text);
+}
+
+.loading-sub {
+  font-size: 0.9rem;
+  color: var(--text2);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1;   }
+}
+
+/* ============================================================
+   LOGO CHIP (top-left on sub-pages)
+   ============================================================ */
+.page-logo {
+  position: fixed;
+  top: 22px;
+  left: 22px;
+  z-index: 999;
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: 1rem;
+  color: var(--red);
+  letter-spacing: -0.01em;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.page-logo.show { opacity: 1; pointer-events: all; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 480px) {
+  .food-mosaic { grid-template-columns: repeat(3, 1fr); }
+  .food-tile:nth-child(4),
+  .food-tile:nth-child(5) { display: none; }
+  .q-grid { grid-template-columns: 1fr 1fr; }
+  .landing-food-strip { height: 36%; }
+  .landing-content { margin-top: calc(36% - 30px); }
+}
+
+@media (min-width: 768px) {
+  .q-wrapper, .result-container, #page-name { max-width: 560px; }
+  .q-options:not(.q-grid) .q-option { padding: 20px 28px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Adire background texture -->
+<div class="adire-bg"></div>
+
+<!-- Theme toggle -->
+<button class="theme-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+
+<!-- Logo chip (shows on sub-pages) -->
+<div class="page-logo" id="pageLogo">Chefbii</div>
+
+<!-- ============================================================
+     PAGE 1: LANDING
+     ============================================================ -->
+<section class="page active" id="page-landing">
+  <div class="landing-hero">
+    <div class="landing-food-strip">
+      <div class="food-mosaic">
+        <div class="food-tile">🍲</div>
+        <div class="food-tile">🍛</div>
+        <div class="food-tile">🥩</div>
+        <div class="food-tile">🫙</div>
+        <div class="food-tile">🍚</div>
+      </div>
+    </div>
+
+    <div class="landing-content">
+      <div class="landing-dot-row">
+        <div class="dot sm"></div>
+        <div class="dot"></div>
+        <div class="dot sm"></div>
+      </div>
+
+      <h1 class="landing-brand">
+        Chefbii<br><span>Bukateria</span>
+      </h1>
+
+      <p class="landing-sub">
+        Real food. Real flavor. Cooked the way your mama taught hers.
+      </p>
+
+      <div class="landing-dot-row">
+        <div class="dot sm"></div>
+        <div class="dot"></div>
+        <div class="dot sm"></div>
+      </div>
+
+      <button class="btn-primary" onclick="goTo('page-name')" style="margin-top:10px;">
+        <span>Find What to Eat</span>
+        <span>→</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PAGE 2: NAME INPUT
+     ============================================================ -->
+<section class="page" id="page-name">
+  <div class="name-header">
+    <span class="greeting">Welcome, traveller</span>
+    <h2>What do we call you?</h2>
+    <p>Before we feed you, let us know who you are. No surname needed — just your name will do.</p>
+  </div>
+
+  <div class="name-input-wrap" style="width:100%;max-width:420px;">
+    <input
+      type="text"
+      class="name-input"
+      id="nameInput"
+      placeholder="Enter your name..."
+      maxlength="40"
+      autocomplete="given-name"
+      autofocus
+    />
+  </div>
+
+  <button class="btn-primary" onclick="submitName()">
+    Continue <span>→</span>
+  </button>
+
+  <button class="btn-ghost" onclick="goTo('page-landing')" style="margin-top:4px;">
+    ← Back
+  </button>
+</section>
+
+<!-- ============================================================
+     PAGE 3: QUESTIONS
+     ============================================================ -->
+<section class="page" id="page-questions">
+  <div class="q-wrapper">
+    <!-- Progress -->
+    <div class="q-progress">
+      <div class="progress-bars" id="progressBars"></div>
+      <div class="q-step-label" id="stepLabel">1 of 5</div>
+    </div>
+
+    <!-- Question slides rendered by JS -->
+    <div class="q-content" id="qContent"></div>
+
+    <!-- Nav -->
+    <div class="q-nav">
+      <button class="btn-ghost" id="btnBack" onclick="prevQuestion()">← Back</button>
+      <button class="btn-primary" id="btnNext" onclick="nextQuestion()" disabled>
+        Next <span>→</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PAGE 4: LOADING
+     ============================================================ -->
+<section class="page" id="page-loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Consulting the kitchen...</div>
+  <div class="loading-sub" id="loadingMsg">Àwa ń pèsè oúnjẹ rẹ...</div>
+</section>
+
+<!-- ============================================================
+     PAGE 5: RESULT
+     ============================================================ -->
+<section class="page" id="page-result">
+  <div class="result-container" id="resultContainer"></div>
+</section>
+
+
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+let state = {
+  name: '',
+  answers: {},        // q0..q4
+  currentQ: 0,
+  recommendation: null
+};
+
+const TOTAL_Q = 5;
+
+/* ============================================================
+   QUESTIONS DATA
+   ============================================================ */
+const questions = [
+  {
+    id: 'mood',
+    title: 'What are you in the mood for?',
+    layout: 'list',
+    options: [
+      { value: 'swallow', icon: '🫙', label: 'Swallow',    desc: 'Àmàlà, iyán, ẹba — the real deal' },
+      { value: 'solid',   icon: '🍚', label: 'Solid food', desc: 'Rice, beans, or something like that' }
+    ]
+  },
+  {
+    id: 'taste',
+    title: 'What taste are you after?',
+    layout: 'grid',
+    options: [
+      { value: 'spicy',   icon: '🌶️', label: 'Spicy',   desc: 'Let it burn nice' },
+      { value: 'rich',    icon: '🍲', label: 'Rich',    desc: 'Deep, full flavor' },
+      { value: 'mild',    icon: '☁️', label: 'Mild',    desc: 'Easy on the tongue' },
+      { value: 'comfort', icon: '🫶', label: 'Comfort', desc: 'Reminds you of home' }
+    ]
+  },
+  {
+    id: 'hunger',
+    title: 'How hungry are you right now?',
+    layout: 'list',
+    options: [
+      { value: 'light',  icon: '🌿', label: 'Light',        desc: 'Just a little something' },
+      { value: 'medium', icon: '🍽️', label: 'Medium',       desc: 'Properly hungry' },
+      { value: 'heavy',  icon: '🔥', label: 'Very hungry',  desc: 'My stomach is serious right now' }
+    ]
+  },
+  {
+    id: 'craving',
+    title: 'What kind of craving is this?',
+    layout: 'list',
+    options: [
+      { value: 'traditional', icon: '🏺', label: 'Local traditional', desc: 'The way grandma made it' },
+      { value: 'buka',        icon: '🪑', label: 'Street buka style',  desc: 'Hot, fast, satisfying' },
+      { value: 'filling',     icon: '💪', label: 'Something filling',  desc: 'I want to be full. Full full.' }
+    ]
+  },
+  {
+    id: 'drink',
+    title: 'Will you take a drink with that?',
+    layout: 'list',
+    options: [
+      { value: 'cold', icon: '🥤', label: 'Cold drink',  desc: 'Chilled and refreshing' },
+      { value: 'none', icon: '❌', label: 'No drink',    desc: 'Water is fine, thank you' }
+    ]
+  }
+];
+
+/* ============================================================
+   FOOD INTELLIGENCE ENGINE
+   ============================================================ */
+function computeRecommendation(a) {
+  const mood    = a.mood;
+  const taste   = a.taste;
+  const hunger  = a.hunger;
+  const craving = a.craving;
+  const drink   = a.drink;
+
+  let main, soup = null, proteins = [], sides = [], drinkText = null, whyText, funfact;
+
+  /* -------- SWALLOW -------- */
+  if (mood === 'swallow') {
+    // Pick swallow based on taste+craving
+    if (taste === 'spicy' || craving === 'buka') {
+      main = 'Àmàlà';
+      soup = 'Ẹ̀wédù & Gbẹ̀gìrì';
+    } else if (taste === 'rich' || craving === 'traditional') {
+      main = 'Iyán (Pounded Yam)';
+      soup = 'Ẹ̀gúsí';
+    } else if (taste === 'comfort') {
+      main = 'Àmàlà';
+      soup = 'Ẹ̀fọ́ Riro';
+    } else if (craving === 'filling' || hunger === 'heavy') {
+      main = 'Iyán (Pounded Yam)';
+      soup = 'Ògbọ̀nọ̀';
+    } else {
+      main = 'Ẹba';
+      soup = 'Okro soup';
+    }
+
+    // Protein for swallow
+    if (hunger === 'heavy') {
+      proteins = ['Beef', 'Pọ́nmọ̀', 'Assorted'];
+    } else if (hunger === 'medium') {
+      proteins = ['Beef', 'Pọ́nmọ̀'];
+    } else {
+      proteins = ['Pọ́nmọ̀'];
+    }
+
+    whyText = buildWhySwallow(main, soup, taste, hunger, craving);
+    funfact = getFunFact(main, soup);
+
+  } else {
+    /* -------- SOLID -------- */
+
+    if (taste === 'spicy' || craving === 'buka') {
+      main  = 'White Rice';
+      soup  = 'Àtà Díndin (Fried pepper sauce)';
+    } else if (taste === 'comfort' && craving === 'traditional') {
+      main  = 'Ẹ̀wà Àgọ̀yìn (Beans)';
+      soup  = 'Àtà Díndin';
+    } else if (craving === 'filling' || hunger === 'heavy') {
+      main  = 'Jollof Rice';
+      soup  = null;
+    } else if (taste === 'rich') {
+      main  = 'Ofada Rice';
+      soup  = 'Ofada Stew (Ayàmàsẹ)';
+    } else {
+      main  = 'Jollof Rice';
+      soup  = null;
+    }
+
+    // Proteins for solid
+    if (hunger === 'heavy') {
+      proteins = ['Beef', 'Pọ́nmọ̀', 'Wara'];
+    } else if (hunger === 'medium') {
+      proteins = ['Chicken', 'Beef'];
+    } else {
+      proteins = ['Chicken'];
+    }
+
+    // Sides only for solid
+    if (hunger === 'heavy') {
+      sides = ['Dòdò (Fried Plantain)', 'Boiled egg'];
+    } else if (craving === 'buka') {
+      sides = ['Mọ́mọ́ Ẹlẹ́wẹ̀'];
+    } else if (hunger === 'medium') {
+      sides = ['Dòdò (Fried Plantain)'];
+    }
+
+    whyText = buildWhySolid(main, soup, taste, hunger, craving);
+    funfact = getFunFact(main, soup);
+  }
+
+  // Drink
+  if (drink === 'cold') {
+    if (taste === 'spicy') {
+      drinkText = 'Chilled Zobo or Malta';
+    } else {
+      drinkText = 'Chilled soft drink or Zobo';
+    }
+  }
+
+  return { main, soup, proteins, sides, drinkText, whyText, funfact };
+}
+
+function buildWhySwallow(main, soup, taste, hunger, craving) {
+  let lines = [];
+  if (hunger === 'heavy') lines.push(`You said you are very hungry — ${main} with full assorted protein will put that to rest quickly.`);
+  else if (hunger === 'light') lines.push(`Light hunger calls for ${main} — satisfying without weighing you down.`);
+  else lines.push(`${main} is the perfect midpoint. Not too light, not too heavy.`);
+
+  if (taste === 'spicy') lines.push(`You want spice, and ${soup} delivers. The pepper in that soup is no joke.`);
+  else if (taste === 'comfort') lines.push(`${soup} is pure comfort. It is the kind of food that feels like a warm hug after a long day.`);
+  else if (taste === 'rich') lines.push(`${soup} is rich, bold, and deeply flavored. Exactly what you asked for.`);
+
+  if (craving === 'traditional') lines.push('This is a proper Yoruba traditional meal — nothing borrowed, nothing foreign.');
+  else if (craving === 'buka') lines.push('Hot from the pot, served fast, just like any good buka.');
+
+  return lines.join(' ');
+}
+
+function buildWhySolid(main, soup, taste, hunger, craving) {
+  let lines = [];
+  if (hunger === 'heavy') lines.push(`Very hungry? ${main} with multiple proteins and sides will handle that.`);
+  else if (hunger === 'light') lines.push(`A lighter plate — but still satisfying, still proper Nigerian food.`);
+  else lines.push(`${main} is a balanced choice for your level of hunger.`);
+
+  if (soup) lines.push(`The ${soup} brings the depth and character that makes the meal sing.`);
+  if (taste === 'spicy') lines.push('Pepper lovers rejoice — this combination delivers heat in the best way.');
+  if (craving === 'buka') lines.push('This is buka energy. Plated fast, eaten faster.');
+  if (craving === 'traditional') lines.push('Deeply rooted in Yoruba tradition. This is generational food.');
+
+  return lines.join(' ');
+}
+
+function getFunFact(main, soup) {
+  const facts = {
+    'Àmàlà': {
+      icon: '🏺',
+      title: 'Why Àmàlà is sacred in Yoruba land',
+      text: 'Àmàlà is made from dried yam flour (èlùbọ́) and has been a staple of Yoruba cuisine for centuries. In Lagos and Ibadan, no proper buka is taken seriously without Àmàlà on the menu. Older Yoruba people say "ẹni tó jẹ àmàlà ní owó lọ" — those who eat amala have strength in hand.'
+    },
+    'Iyán (Pounded Yam)': {
+      icon: '💪',
+      title: 'Iyán — the king of swallows',
+      text: 'Iyán (pounded yam) is considered the most prestigious swallow in Yoruba culture. It was traditionally reserved for important gatherings and celebrations. The act of pounding yam together (in large wooden mortars) was itself a communal ritual — neighbors would take turns, creating rhythm and conversation.'
+    },
+    'Ẹba': {
+      icon: '🌾',
+      title: 'Ẹba — the people\'s food',
+      text: 'Ẹba is made from gari (cassava granules) and is the most widely eaten swallow across all of West Africa. It was once considered "poor man\'s food" but today it crosses every class barrier. No buka table is complete without a well-molded eba.'
+    },
+    'Jollof Rice': {
+      icon: '🍚',
+      title: 'Jollof Rice — no introduction needed',
+      text: 'Yoruba jollof rice (known for its smoky "party rice" flavor from firewood cooking) is a cultural institution. The debate over who makes it best is ongoing — but in a proper Nigerian buka, the pot-bottom rice (the smoky crust at the bottom) is considered a prize.'
+    },
+    'Ofada Rice': {
+      icon: '🌾',
+      title: 'Ofada — the original Yoruba rice',
+      text: 'Ofada rice is indigenous to Ogun and Oyo States in Nigeria. Unlike imported parboiled rice, ofada is unpolished and earthy. When paired with ayàmàsẹ (the smoky green pepper stew), it becomes one of the most distinctive meals in all of Yoruba cuisine.'
+    },
+    'White Rice': {
+      icon: '🍛',
+      title: 'White rice and ata — a buka classic',
+      text: 'A plate of white rice with rich fried pepper stew (àtà díndin) is the bread-and-butter of Nigerian restaurants. It is fast to serve, deeply satisfying, and endlessly customizable by adding proteins and sides.'
+    },
+    'Ẹ̀wà Àgọ̀yìn (Beans)': {
+      icon: '🫘',
+      title: 'Ẹ̀wà Àgọ̀yìn — Yoruba street food royalty',
+      text: 'Ẹ̀wà Àgọ̀yìn (Agege beans) is one of the most beloved street foods in Lagos and Yoruba land. Slow-cooked until soft and paired with a deeply spiced palm oil pepper sauce, it is eaten at roadside stalls, in bukas, and at the grandest of Nigerian celebrations.'
+    }
+  };
+
+  return facts[main] || {
+    icon: '🍽️',
+    title: 'The soul of the Yoruba kitchen',
+    text: 'Yoruba food is not just about nutrition — it is community, memory, and identity. Every dish carries a story, every spice a tradition. Eating in a Yoruba buka is not just a meal; it is an experience.'
+  };
+}
+
+/* ============================================================
+   RENDER QUESTIONS
+   ============================================================ */
+function renderQuestion(index) {
+  const q = questions[index];
+  const qContent = document.getElementById('qContent');
+
+  // Progress bars
+  const bars = document.getElementById('progressBars');
+  bars.innerHTML = '';
+  for (let i = 0; i < TOTAL_Q; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'pbar' + (i < index ? ' done' : i === index ? ' active' : '');
+    bars.appendChild(bar);
+  }
+  document.getElementById('stepLabel').textContent = `${index+1} of ${TOTAL_Q}`;
+
+  // Question content
+  qContent.innerHTML = '';
+
+  const numEl = document.createElement('div');
+  numEl.className = 'q-number';
+  numEl.textContent = `Question ${index+1}`;
+  qContent.appendChild(numEl);
+
+  const titleEl = document.createElement('div');
+  titleEl.className = 'q-title';
+  titleEl.textContent = q.title;
+  qContent.appendChild(titleEl);
+
+  const opts = document.createElement('div');
+  opts.className = q.layout === 'grid' ? 'q-options q-grid' : 'q-options';
+
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'q-option' + (state.answers[q.id] === opt.value ? ' selected' : '');
+    btn.innerHTML = `
+      <span class="q-option-icon">${opt.icon}</span>
+      <span class="q-option-body">
+        <span class="q-option-label">${opt.label}</span>
+        <span class="q-option-desc">${opt.desc}</span>
+      </span>
+      <span class="check"></span>
+    `;
+    btn.addEventListener('click', () => selectOption(q.id, opt.value, btn, opts));
+    opts.appendChild(btn);
+  });
+
+  qContent.appendChild(opts);
+
+  // Back button logic
+  const btnBack = document.getElementById('btnBack');
+  if (index === 0) {
+    btnBack.textContent = '← Back';
+    btnBack.onclick = () => goTo('page-name');
+  } else {
+    btnBack.textContent = '← Back';
+    btnBack.onclick = prevQuestion;
+  }
+
+  // Next button
+  const btnNext = document.getElementById('btnNext');
+  btnNext.textContent = index === TOTAL_Q - 1 ? 'See My Meal 🍽️' : 'Next →';
+  btnNext.disabled = !state.answers[q.id];
+
+  // Slide animation
+  opts.style.animation = 'none';
+  opts.offsetHeight; // reflow
+  opts.style.animation = '';
+  titleEl.style.animation = 'none';
+  titleEl.offsetHeight;
+  titleEl.style.animation = '';
+}
+
+function selectOption(qId, value, btnEl, optsContainer) {
+  state.answers[qId] = value;
+  optsContainer.querySelectorAll('.q-option').forEach(b => b.classList.remove('selected'));
+  btnEl.classList.add('selected');
+  document.getElementById('btnNext').disabled = false;
+}
+
+function nextQuestion() {
+  const q = questions[state.currentQ];
+  if (!state.answers[q.id]) return;
+
+  if (state.currentQ < TOTAL_Q - 1) {
+    state.currentQ++;
+    renderQuestion(state.currentQ);
+  } else {
+    showLoading();
+  }
+}
+
+function prevQuestion() {
+  if (state.currentQ > 0) {
+    state.currentQ--;
+    renderQuestion(state.currentQ);
+  }
+}
+
+/* ============================================================
+   LOADING & RESULT
+   ============================================================ */
+const loadingMessages = [
+  'Àwa ń pèsè oúnjẹ rẹ...',
+  'Consulting the soup pot...',
+  'Your àmàlà is being prepared...',
+  'Almost ready, my friend...'
+];
+
+function showLoading() {
+  let i = 0;
+  const msgEl = document.getElementById('loadingMsg');
+  const interval = setInterval(() => {
+    i = (i + 1) % loadingMessages.length;
+    msgEl.textContent = loadingMessages[i];
+  }, 700);
+
+  goTo('page-loading');
+
+  setTimeout(() => {
+    clearInterval(interval);
+    state.recommendation = computeRecommendation(state.answers);
+    renderResult();
+    goTo('page-result');
+  }, 2800);
+}
+
+function renderResult() {
+  const r = state.recommendation;
+  const name = state.name;
+  const container = document.getElementById('resultContainer');
+
+  const proteinsStr = r.proteins.join(', ');
+  const sidesStr = r.sides.length ? r.sides.join(', ') : null;
+
+  // Build WhatsApp message
+  const waLines = [
+    `Hello, I would like to place an order.`,
+    `Food: ${r.main}${r.soup ? ' + ' + r.soup : ''}`,
+    `Protein: ${proteinsStr}`,
+    sidesStr ? `Sides: ${sidesStr}` : null,
+    r.drinkText ? `Drink: ${r.drinkText}` : null,
+    `Name: ${name}`,
+    `Recommended by Chefbii Bukateria`
+  ].filter(Boolean).join('\n');
+
+  const waLink = `https://wa.me/2349130925341?text=${encodeURIComponent(waLines)}`;
+
+  const mealRowsHTML = `
+    <div class="meal-row">
+      <span class="meal-row-icon">🍲</span>
+      <div class="meal-row-body">
+        <span class="meal-row-label">Main Food</span>
+        <span class="meal-row-value">${r.main}</span>
+      </div>
+    </div>
+    ${r.soup ? `
+    <div class="meal-row-sep"></div>
+    <div class="meal-row">
+      <span class="meal-row-icon">🍛</span>
+      <div class="meal-row-body">
+        <span class="meal-row-label">Soup / Sauce</span>
+        <span class="meal-row-value">${r.soup}</span>
+      </div>
+    </div>` : ''}
+    <div class="meal-row-sep"></div>
+    <div class="meal-row">
+      <span class="meal-row-icon">🍖</span>
+      <div class="meal-row-body">
+        <span class="meal-row-label">Protein${r.proteins.length > 1 ? 's' : ''}</span>
+        <span class="meal-row-value">${proteinsStr}</span>
+      </div>
+    </div>
+    ${sidesStr ? `
+    <div class="meal-row-sep"></div>
+    <div class="meal-row">
+      <span class="meal-row-icon">🥘</span>
+      <div class="meal-row-body">
+        <span class="meal-row-label">Sides</span>
+        <span class="meal-row-value">${sidesStr}</span>
+      </div>
+    </div>` : ''}
+    ${r.drinkText ? `
+    <div class="meal-row-sep"></div>
+    <div class="meal-row">
+      <span class="meal-row-icon">🥤</span>
+      <div class="meal-row-body">
+        <span class="meal-row-label">Drink</span>
+        <span class="meal-row-value">${r.drinkText}</span>
+      </div>
+    </div>` : ''}
+  `;
+
+  container.innerHTML = `
+    <div class="result-header">
+      <div class="result-eyebrow">Your meal is ready</div>
+      <div class="result-title"><em>${name}</em>, this is what you should eat right now</div>
+    </div>
+
+    <div class="result-divider"><span>🍽️</span></div>
+
+    <div class="meal-card">
+      <div class="meal-card-top">
+        <span class="meal-emoji-big">${getMealEmoji(r.main)}</span>
+        <div class="meal-name">${r.main}</div>
+        ${r.soup ? `<div class="meal-subtitle">with ${r.soup}</div>` : ''}
+      </div>
+      <div class="meal-card-body">
+        ${mealRowsHTML}
+      </div>
+    </div>
+
+    <div class="why-card">
+      <div class="why-label">✅ Why this fits you</div>
+      <div class="why-text">${r.whyText}</div>
+    </div>
+
+    <div class="funfact-card">
+      <div class="funfact-icon">${r.funfact.icon}</div>
+      <div class="funfact-body">
+        <div class="funfact-title">${r.funfact.title}</div>
+        <div class="funfact-text">${r.funfact.text}</div>
+      </div>
+    </div>
+
+    <div class="order-section">
+      <a class="btn-order" href="${waLink}" target="_blank" rel="noopener">
+        🛒 Order Now on WhatsApp
+      </a>
+      <div class="order-note">Your full order will be sent directly to the kitchen on WhatsApp.</div>
+      <button class="btn-restart" onclick="restart()">Start over ↺</button>
+    </div>
+  `;
+}
+
+function getMealEmoji(main) {
+  const map = {
+    'Àmàlà': '🫙',
+    'Iyán (Pounded Yam)': '🍲',
+    'Ẹba': '🥘',
+    'Jollof Rice': '🍚',
+    'Ofada Rice': '🌾',
+    'White Rice': '🍚',
+    'Ẹ̀wà Àgọ̀yìn (Beans)': '🫘'
+  };
+  return map[main] || '🍽️';
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function goTo(pageId) {
+  const current = document.querySelector('.page.active');
+  if (current) {
+    current.classList.add('exit');
+    current.classList.remove('active');
+    setTimeout(() => current.classList.remove('exit'), 400);
+  }
+  const next = document.getElementById(pageId);
+  if (next) {
+    next.classList.add('active');
+  }
+
+  // Show/hide logo chip
+  const logo = document.getElementById('pageLogo');
+  logo.classList.toggle('show', pageId !== 'page-landing');
+}
+
+function submitName() {
+  const val = document.getElementById('nameInput').value.trim();
+  if (!val) {
+    document.getElementById('nameInput').style.borderColor = 'var(--red)';
+    document.getElementById('nameInput').focus();
+    return;
+  }
+  state.name = val.charAt(0).toUpperCase() + val.slice(1);
+  state.currentQ = 0;
+  renderQuestion(0);
+  goTo('page-questions');
+}
+
+document.getElementById('nameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitName();
+});
+
+document.getElementById('nameInput').addEventListener('input', () => {
+  document.getElementById('nameInput').style.borderColor = '';
+});
+
+function restart() {
+  state = { name: '', answers: {}, currentQ: 0, recommendation: null };
+  document.getElementById('nameInput').value = '';
+  document.getElementById('resultContainer').innerHTML = '';
+  goTo('page-landing');
+}
+
+/* ============================================================
+   THEME TOGGLE
+   ============================================================ */
+const themeBtn = document.getElementById('themeBtn');
+let dark = false;
+
+themeBtn.addEventListener('click', () => {
+  dark = !dark;
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  themeBtn.textContent = dark ? '☀️' : '🌙';
+});
+
+// Check system preference
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  dark = true;
+  document.documentElement.setAttribute('data-theme', 'dark');
+  themeBtn.textContent = '☀️';
+}
+</script>
+</body>
+</html>
